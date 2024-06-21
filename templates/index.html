@@ -1,0 +1,31 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <title>Monitoring Dashboard</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
+    <script src="https://cdn.plot.ly/plotly-latest.min.js"></script>
+  </head>
+  <body>
+    <h1>Monitoring Dashboard</h1>
+    <div id="graph"></div>
+    <script>
+    var layout = {
+        title: 'CPU and RAM Usage Over Time',
+        xaxis: { title: 'Time' },
+        yaxis: { title: 'Usage (%)' }
+    };
+
+    function updateGraph() {
+        $.getJSON('/data', function(data) {
+            var cpu_trace = { x: data.timestamps, y: data.cpu_values, mode: 'lines', name: 'CPU Usage' };
+            var ram_trace = { x: data.timestamps, y: data.ram_values, mode: 'lines', name: 'RAM Usage' };
+            Plotly.newPlot('graph', [cpu_trace, ram_trace], layout);
+        });
+    }
+
+    updateGraph();  
+    setInterval(updateGraph, 10000);  
+    </script>
+  </body>
+</html>
