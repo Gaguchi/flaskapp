@@ -1,31 +1,44 @@
 <!doctype html>
-<html lang="en">
+<html lang="ru">
   <head>
     <meta charset="utf-8">
-    <title>Monitoring Dashboard</title>
+    <title>Тестовое задание</title>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
     <script src="https://cdn.plot.ly/plotly-latest.min.js"></script>
   </head>
   <body>
-    <h1>Monitoring Dashboard</h1>
+    <h1>Тестовое задание - Мониторинг cpu и ram</h1>
+    <input type="date" id="datePicker"> <label for="datePicker">Выберите день.</label>
     <div id="graph"></div>
     <script>
-    var layout = {
-        title: 'CPU and RAM Usage Over Time',
-        xaxis: { title: 'Time' },
-        yaxis: { title: 'Usage (%)' }
-    };
-
     function updateGraph() {
-        $.getJSON('/data', function(data) {
-            var cpu_trace = { x: data.timestamps, y: data.cpu_values, mode: 'lines', name: 'CPU Usage' };
-            var ram_trace = { x: data.timestamps, y: data.ram_values, mode: 'lines', name: 'RAM Usage' };
-            Plotly.newPlot('graph', [cpu_trace, ram_trace], layout);
-        });
+      var date = $('#datePicker').val();
+      $.getJSON('/data?date=' + date, function(data) {
+        var cpu_trace, ram_trace;
+        if (data.timestamps.length > 0) {
+          cpu_trace = { x: data.timestamps, y: data.cpu_values, mode: 'lines', name: 'Использование CPU' };
+          ram_trace = { x: data.timestamps, y: data.ram_values, mode: 'lines', name: 'Использование RAM' };
+        } else {
+          cpu_trace = { x: [], y: [], mode: 'lines', name: 'Использование CPU' };
+          ram_trace = { x: [], y: [], mode: 'lines', name: 'Использование RAM' };
+        }
+        var layout = {
+            title: 'Использование CPU и RAM со временем',
+            xaxis: { 
+                title: 'Дата и Время',
+                range: [date + 'T00:00:00', date + 'T23:59:59']
+            },
+            yaxis: { title: 'Использование (%)' }
+        };
+        Plotly.newPlot('graph', [cpu_trace, ram_trace], layout);
+      });
     }
 
-    updateGraph();  
-    setInterval(updateGraph, 10000);  
+    var today = new Date().toISOString().split('T')[0];
+    $('#datePicker').val(today);
+    updateGraph();
+
+    $('#datePicker').change(updateGraph);  
     </script>
   </body>
 </html>
